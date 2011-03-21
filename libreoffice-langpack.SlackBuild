@@ -1,0 +1,151 @@
+#!/bin/sh
+#
+# Slackware build script for LibreOffice Language Packs
+# Copyright (C) 2011 Georgi D. Sotirov <gdsotirov@dir.bg>
+# The source packages are retrieved from ftp://ftp.spnet.net/ooo-bg/
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# Visit SlackPack at http://sotirov-bg.net/slackpack/
+#
+# $Id: libreoffice-langpack.SlackBuild,v 1.1 2011/03/21 22:55:54 gsotirov Exp $
+#
+
+. ../slack-package.conf
+
+LIBO_NAME=libreoffice
+NAME=${LIBO_NAME}-langpack
+VERSION_MAJOR=3
+VERSION_MINOR=3
+VERSION_PATCH=1
+VERSION_RC='rc2'
+VERSION=$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH
+BUILD=${BUILD:-1}
+LOCALE=${LOCALE:-'bg'}
+LOCALE_FULL=${LOCALE_FULL:-'Bulgarian'}
+
+CWD=${CWD:-`pwd`}
+TMP=${TMP:-/tmp}
+ARCH=${ARCH_OO:-i686}
+
+function unrpm() {
+  rpm2cpio < $1 | cpio --extract --make-directories --unconditional --preserve-modification-time
+}
+
+# Check for required utilities
+which rpm2cpio >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "Utility 'rpm2cpio' is missing. Please, install the package 'rpm' in order to continue."
+  exit 1
+fi
+which cpio >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+  echo "Utility 'cpio' is missing. Please, install the package 'cpio' in order to continue."
+  exit 2
+fi
+
+# Source pkg format: LLibO_3.3.1_Linux_x86_langpack-rpm_bg.tar.gz
+# Source dir format: LibO_3.3.1rc2_Linux_x86_langpack-rpm_bg/
+if [ "$ARCH" == "i686" ]; then
+  PACK_NAME="LibO_${VERSION}_Linux_x86_langpack-rpm_${LOCALE}"
+  SRC_DIR="LibO_${VERSION}${VERSION_RC}_Linux_x86_langpack-rpm_${LOCALE}"
+elif [ "$ARCH" == "x86_64" ]; then
+  PACK_NAME="LibO_${VERSION}_Linux_x86-64_langpack-rpm_${LOCALE}"
+  SRC_DIR="LibO_${VERSION_MAJOR}${VERSION_RC}_Linux_x86_64_langpack-rpm_${LOCALE}"
+else
+  PACK_NAME="LibO_${VERSION}_Linux_${ARCH}_langpack-rpm_${LOCALE}"
+  SRC_DIR="LibO_${VERSION_MAJOR}${VERSION_RC}_Linux_${ARCH}_langpack-rpm_${LOCALE}"
+fi
+
+SRC=$TMP/$SRC_DIR
+if [ -e $SRC ]; then
+  echo "Source directory '$SRC' already exists! Plaese, move it or remove it."
+  exit 1
+fi
+
+# Package build location
+PKG=$TMP/package-$NAME
+if [ -e $PKG -a -d $PKG ]; then
+  echo "Package creation directory '$PKG' already exists! Please, move it or remove it."
+  exit 2
+fi
+mkdir -p $PKG
+
+# Extract archive
+cd $TMP
+ARCHIVE="$PACK_NAME.tar.gz"
+echo "[Step 1 of 5] Extracting application archive $ARCHIVE..."
+if [ -e $CWD/$ARCHIVE ]; then
+  tar -xvf $CWD/$ARCHIVE
+else
+  echo "File $CWD/$ARCHIVE does not exists! Exiting."
+  exit 3
+fi
+
+echo "[Step 2 of 5] Extracting files from rpm packages..."
+cd $SRC/RPMS
+# This package is included in the main disitrubtion
+rm ${LIBO_NAME}${VERSION_MAJOR}-dict-en-${VERSION}-*.rpm
+
+for FILE in *.rpm; do
+  echo -n "$FILE: "
+  unrpm $FILE
+done
+mv opt $PKG
+
+# Fix permisions
+echo "[Step 3 of 5] Setting file and directory permissions..."
+cd $PKG
+chown -R root:root *
+find . -type d -exec chmod 755 {} \;
+chmod -R u+rw,go+r-w,a-s .
+bin_perms $PKG
+
+# Create documentation
+DOCFILES="$DOCFILES LICENSE*"
+echo "[Step 4 of 5] Creating the documentation for $NAME-$VERSION..."
+( cd $PKG/opt/${LIBO_NAME}/readmes ; create_docs $PKG $NAME-$LOCALE-$VERSION )
+install -m 644 $CWD/LGPLLIC $PKG/usr/doc/${NAME}-${LOCALE}-${VERSION}/COPYING
+
+# Create service infos
+echo "[Step 5 of 5] Creating package's service information..."
+cd $PKG
+install -m 755 -d $PKG/install
+# Write the correct locale Slackware description file
+cat $CWD/slack-desc | sed s/LC/$LOCALE/g > $PKG/install/slack-desc
+install -m 644 $CWD/slack-required $PKG/install/slack-required
+
+install -m 755 -d $PKG/usr/src/slackbuilds/$NAME-$LOCALE-$VERSION
+install -m 644 $CWD/slack-desc       $PKG/usr/src/slackbuilds/$NAME-$LOCALE-$VERSION/slack-desc
+install -m 644 $CWD/slack-required   $PKG/usr/src/slackbuilds/$NAME-$LOCALE-$VERSION/slack-required
+install -m 644 $CWD/$NAME.SlackBuild $PKG/usr/src/slackbuilds/$NAME-$LOCALE-$VERSION/$NAME-$LOCALE.SlackBuild
+
+# Make the package
+echo "[Step 7 of 7] Creating package $NAME-$VERSION..."
+cd $PKG
+makepkg -l y -c n -p $PKG_DIR/$NAME-$LOCALE-$VERSION-$ARCH-$BUILD$MYIN.txz
+cd $PKG_DIR
+cp $CWD/slack-desc $NAME-$LOCALE-$VERSION-$ARCH-$BUILD$MYIN.txt
+md5sum $NAME-$LOCALE-$VERSION-$ARCH-$BUILD$MYIN.txz > $NAME-$LOCALE-$VERSION-$ARCH-$BUILD$MYIN.txz.md5
+
+# Clean up (optionally)
+if [ "$1" = "--cleanup" ]; then
+  echo "Cleaning up..."
+  rm -rf $SRC
+  rm -rf $PKG
+fi
+
+echo "All done."
+
