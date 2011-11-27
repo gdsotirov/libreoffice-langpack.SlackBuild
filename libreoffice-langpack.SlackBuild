@@ -20,7 +20,7 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: libreoffice-langpack.SlackBuild,v 1.3 2011/11/26 15:54:20 gsotirov Exp $
+# $Id: libreoffice-langpack.SlackBuild,v 1.4 2011/11/27 09:53:24 gsotirov Exp $
 #
 
 . ../../slack-package.conf
@@ -28,9 +28,9 @@
 LIBO_NAME=libreoffice
 NAME=${LIBO_NAME}-langpack
 VERSION_MAJOR=3
-VERSION_MINOR=3
+VERSION_MINOR=4
 VERSION_PATCH=4
-VERSION_RC='rc1'
+VERSION_RC='rc2'
 VERSION=$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH
 BUILD=${BUILD:-1}
 LOCALE=${LOCALE:-'bg'}
@@ -61,7 +61,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Source pkg format: LLibO_3.3.4_Linux_x86_langpack-rpm_bg.tar.gz
-# Source dir format: LibO_3.3.1rc1_Linux_x86_langpack-rpm_bg/
+# Source dir format: LibO_3.4.4rc2_Linux_x86_langpack-rpm_bg
 if [ "$ARCH" == "i686" ]; then
   PACK_NAME="LibO_${VERSION}_Linux_x86_langpack-rpm_${LOCALE}"
   SRC_DIR="LibO_${VERSION}${VERSION_RC}_Linux_x86_langpack-rpm_${LOCALE}"
@@ -101,7 +101,7 @@ fi
 echo "[Step 2 of 5] Extracting files from rpm packages..."
 cd $SRC/RPMS
 # This package is included in the main disitrubtion
-rm ${LIBO_NAME}${VERSION_MAJOR}-dict-en-${VERSION}-*.rpm
+rm ${LIBO_NAME}${VERSION_MAJOR}.${VERSION_MINOR}-dict-en-${VERSION}-*.rpm
 
 for FILE in *.rpm; do
   echo -n "$FILE: "
@@ -120,8 +120,8 @@ bin_perms $PKG
 # Create documentation
 DOCFILES="$DOCFILES LICENSE*"
 echo "[Step 4 of 5] Creating the documentation for $NAME-$VERSION..."
-( cd $PKG/opt/${LIBO_NAME}/readmes ; create_docs $PKG $NAME-$LOCALE-$VERSION )
-( cd $PKG/usr/doc/$NAME-$LOCALE-$VERSION; cp README_$LOCALE README )
+( cd $PKG/opt/${LIBO_NAME}${VERSION_MAJOR}.${VERSION_MINOR}/readmes ; create_docs $PKG $NAME-$LOCALE-$VERSION )
+( cd $PKG/usr/doc/$NAME-$LOCALE-$VERSION; ln -s  README_$LOCALE README )
 install -m 644 $CWD/LGPLLIC $PKG/usr/doc/${NAME}-${LOCALE}-${VERSION}/COPYING
 
 # Create service infos
