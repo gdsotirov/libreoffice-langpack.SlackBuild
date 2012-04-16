@@ -20,7 +20,7 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: libreoffice-langpack.SlackBuild,v 1.4 2011/11/27 09:53:24 gsotirov Exp $
+# $Id: libreoffice-langpack.SlackBuild,v 1.5 2012/04/16 18:28:29 gsotirov Exp $
 #
 
 . ../../slack-package.conf
@@ -28,8 +28,8 @@
 LIBO_NAME=libreoffice
 NAME=${LIBO_NAME}-langpack
 VERSION_MAJOR=3
-VERSION_MINOR=4
-VERSION_PATCH=4
+VERSION_MINOR=5
+VERSION_PATCH=2
 VERSION_RC='rc2'
 VERSION=$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH
 BUILD=${BUILD:-1}
@@ -100,8 +100,6 @@ fi
 
 echo "[Step 2 of 5] Extracting files from rpm packages..."
 cd $SRC/RPMS
-# This package is included in the main disitrubtion
-rm ${LIBO_NAME}${VERSION_MAJOR}.${VERSION_MINOR}-dict-en-${VERSION}-*.rpm
 
 for FILE in *.rpm; do
   echo -n "$FILE: "
