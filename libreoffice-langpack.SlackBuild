@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # Slackware build script for LibreOffice Language Packs
-# Copyright (C) 2011-2018 Georgi D. Sotirov <gdsotirov@dir.bg>
+# Copyright (C) 2011-2019 Georgi D. Sotirov <gdsotirov@dir.bg>
 # The source packages are retrieved from ftp://ftp.spnet.net/ooo-bg/
 #
 # This program is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@
 #
 # Visit SlackPack at http://sotirov-bg.net/slackpack/
 #
-# $Id: libreoffice-langpack.SlackBuild,v 1.44 2018/02/15 09:56:26 gsotirov Exp $
+# $Id: libreoffice-langpack.SlackBuild,v 1.45 2019/11/09 07:28:29 gsotirov Exp $
 #
 
 . ../../slack-package.conf
@@ -29,8 +29,8 @@ LIBO_NAME=libreoffice
 NAME=${LIBO_NAME}-langpack
 VERSION_MAJOR=5
 VERSION_MINOR=4
-VERSION_PATCH=5
-VERSION_RC=1
+VERSION_PATCH=7
+VERSION_RC=2
 VERSION=$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH
 BUILD=${BUILD:-1}
 LOCALE=${LOCALE:-'bg'}
